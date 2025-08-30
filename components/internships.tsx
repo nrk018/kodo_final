@@ -16,7 +16,7 @@ interface Internship {
   duration: string
   type: "Remote" | "On-site" | "Hybrid"
   requiredSkills: {
-    [key: string]: number // skill: minimum level required
+    [key: string]: number 
   }
   preferredSkills: string[]
   benefits: string[]

@@ -276,15 +276,15 @@ export function Dashboard({ user, onLogout }: DashboardProps) {
   const [codeStats, setCodeStats] = useState({
     totalLinesWritten: 2847,
     languageStats: {
-      JavaScript: { lines: 1250, level: 3, xp: 850, maxXp: 1000 },
+      JavaScript: { lines: 1250, level: 6, xp: 850, maxXp: 1000 },
       HTML: { lines: 890, level: 2, xp: 650, maxXp: 800 },
       CSS: { lines: 567, level: 2, xp: 400, maxXp: 800 },
       Python: { lines: 140, level: 1, xp: 140, maxXp: 300 },
     },
     projectsCompleted: 8,
-    skillLevel: "Intermediate Developer",
+    skillLevel: "Senior Developer",
     canStartProjects: true,
-    canApplyInternships: false,
+    canApplyInternships: true,
   })
 
   const nextLevelXP = level * 500

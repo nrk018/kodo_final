@@ -320,7 +320,7 @@ export function Competition({
                 <textarea
                   value={userCode}
                   onChange={(e) => setUserCode(e.target.value)}
-                  className="w-full h-96 p-4 font-mono text-sm border-2 border-stone-400 rounded-lg bg-stone-50 focus:border-primary focus:outline-none resize-none"
+                  className="w-full h-96 p-4 font-mono text-sm border-2 text-black border-stone-400 rounded-lg bg-stone-50 focus:border-primary focus:outline-none resize-none"
                   placeholder="Write your solution here..."
                   disabled={isSubmitting || matchResult !== null}
                 />
@@ -332,7 +332,7 @@ export function Competition({
                   <Button
                     onClick={handleSubmitCode}
                     disabled={isSubmitting || matchResult !== null || timeRemaining === 0}
-                    className="bg-green-600 hover:bg-green-700 text-white border-2 border-green-700 pixel-font"
+                    className="bg-green-600 hover:bg-green-700 text-black border-2 border-green-700 pixel-font"
                   >
                     {isSubmitting ? "Evaluating..." : "Submit Solution"}
                   </Button>
@@ -354,7 +354,7 @@ export function Competition({
                 {currentMatch.players.map((player, index) => (
                   <div
                     key={index}
-                    className={`text-center p-4 rounded-lg border-2 ${
+                    className={` text-black text-center p-4 rounded-lg border-2 ${
                       player.name === "You" ? "bg-blue-50 border-blue-400" : "bg-gray-50 border-gray-400"
                     }`}
                   >
@@ -418,7 +418,7 @@ export function Competition({
           <Button
             variant="outline"
             onClick={onBackToDashboard}
-            className="flex items-center gap-2 border-2 border-stone-400 hover:border-primary bg-transparent"
+            className="flex items-center gap-2 border-2 border-stone-400 hover:border-primary bg-transparent text-black"
           >
             <ArrowLeft className="w-4 h-4" />
             Back to Dashboard
