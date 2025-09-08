@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kōdo Login Test</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 500px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #f0f8ff;
+    }
+    h1 {
+      color: #0066cc;
+      text-align: center;
+    }
+    .card {
+      background-color: white;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      margin-bottom: 20px;
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    input {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+    button {
+      background-color: #0066cc;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    button:hover {
+      background-color: #0055aa;
+    }
+    .result {
+      margin-top: 15px;
+      padding: 10px;
+      border-radius: 4px;
+      background-color: #f5f5f5;
+      white-space: pre-wrap;
+      overflow-x: auto;
+    }
+    .success {
+      color: green;
+    }
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <h1>Kōdo Login Test</h1>
+  
+  <div class="card">
+    <h2>1. Create Test User</h2>
+    <p>First, create a test user with these credentials:</p>
+    <ul>
+      <li><strong>Username:</strong> testuser</li>
+      <li><strong>Email:</strong> test@kodo.dev</li>
+      <li><strong>Password:</strong> password123</li>
+    </ul>
+    <button id="createUserBtn">Create Test User</button>
+    <div id="createUserResult" class="result"></div>
+  </div>
+
+  <div class="card">
+    <h2>2. Test Login</h2>
+    <div class="form-group">
+      <label for="email">Email:</label>
+      <input type="email" id="email" value="test@kodo.dev">
+    </div>
+    <div class="form-group">
+      <label for="password">Password:</label>
+      <input type="password" id="password" value="password123">
+    </div>
+    <button id="loginBtn">Login</button>
+    <div id="loginResult" class="result"></div>
+  </div>
+
+  <script>
+    // Create Test User
+    document.getElementById('createUserBtn').addEventListener('click', async () => {
+      const resultElement = document.getElementById('createUserResult');
+      resultElement.textContent = 'Creating test user...';
+      resultElement.className = 'result';
+      
+      try {
+        const response = await fetch('/api/auth/signup', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            username: 'testuser',
+            email: 'test@kodo.dev',
+            password: 'password123',
+          }),
+        });
+        
+        const data = await response.json();
+        console.log('Signup response:', data);
+        
+        if (response.ok) {
+          resultElement.textContent = 'Test user created successfully!';
+          resultElement.className = 'result success';
+        } else {
+          if (data.error && data.error.includes('already exists')) {
+            resultElement.textContent = 'Test user already exists. You can proceed with login.';
+            resultElement.className = 'result success';
+          } else {
+            throw new Error(data.error || 'Failed to create test user');
+          }
+        }
+      } catch (error) {
+        console.error('Signup error:', error);
+        resultElement.textContent = `Error: ${error.message}`;
+        resultElement.className = 'result error';
+      }
+    });
+
+    // Test Login
+    document.getElementById('loginBtn').addEventListener('click', async () => {
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const resultElement = document.getElementById('loginResult');
+      
+      resultElement.textContent = 'Logging in...';
+      resultElement.className = 'result';
+      
+      try {
+        console.log('Attempting login with:', { email, password });
+        
+        const response = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ email, password }),
+        });
+        
+        console.log('Login response status:', response.status);
+        const data = await response.json();
+        console.log('Login response data:', data);
+        
+        if (response.ok) {
+          // Set cookies manually if needed
+          document.cookie = `auth-token=authenticated; path=/; max-age=${60 * 60 * 24 * 7}`; // 1 week
+          document.cookie = `user-id=${data.user.id}; path=/; max-age=${60 * 60 * 24 * 7}`; // 1 week
+          
+          resultElement.textContent = `Login successful!\n\nUser: ${JSON.stringify(data.user, null, 2)}\n\nCookies: ${document.cookie}`;
+          resultElement.className = 'result success';
+        } else {
+          throw new Error(data.error || 'Login failed');
+        }
+      } catch (error) {
+        console.error('Login error:', error);
+        resultElement.textContent = `Error: ${error.message}`;
+        resultElement.className = 'result error';
+      }
+    });
+  </script>
+</body>
+</html>

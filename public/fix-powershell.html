@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fix PowerShell Execution Policy</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #f0f8ff;
+      line-height: 1.6;
+    }
+    h1 {
+      color: #0066cc;
+      text-align: center;
+    }
+    .card {
+      background-color: white;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      margin-bottom: 20px;
+    }
+    .warning {
+      background-color: #fff3cd;
+      border-left: 4px solid #ffc107;
+      padding: 10px 15px;
+      margin-bottom: 20px;
+    }
+    .success {
+      background-color: #d4edda;
+      border-left: 4px solid #28a745;
+      padding: 10px 15px;
+      margin-bottom: 20px;
+    }
+    code {
+      background-color: #f5f5f5;
+      padding: 2px 5px;
+      border-radius: 3px;
+      font-family: Consolas, Monaco, 'Andale Mono', monospace;
+    }
+    pre {
+      background-color: #f5f5f5;
+      padding: 15px;
+      border-radius: 5px;
+      overflow-x: auto;
+      font-family: Consolas, Monaco, 'Andale Mono', monospace;
+    }
+    .method {
+      border-left: 4px solid #0066cc;
+      padding-left: 15px;
+      margin-bottom: 30px;
+    }
+    .links {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    .links a {
+      flex: 1;
+      text-align: center;
+      background-color: #0066cc;
+      color: white;
+      text-decoration: none;
+      padding: 10px;
+      border-radius: 4px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h1>Fix PowerShell Execution Policy</h1>
+  
+  <div class="card">
+    <div class="warning">
+      <h3>Issue Detected</h3>
+      <p>The login functionality is failing because PowerShell's execution policy is preventing scripts from running. This affects npm scripts and prevents the database from being properly initialized.</p>
+      <p>Error message: <code>npm.ps1 cannot be loaded because running scripts is disabled on the system</code></p>
+    </div>
+
+    <h2>How to Fix the PowerShell Execution Policy</h2>
+    <p>Choose one of the following methods to fix the issue:</p>
+
+    <div class="method">
+      <h3>Method 1: Temporarily Change Execution Policy for Current Session</h3>
+      <p>Open PowerShell as Administrator and run:</p>
+      <pre>Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass</pre>
+      <p>This will only affect the current PowerShell session and will revert when you close it.</p>
+    </div>
+
+    <div class="method">
+      <h3>Method 2: Change Execution Policy for Current User</h3>
+      <p>Open PowerShell as Administrator and run:</p>
+      <pre>Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned</pre>
+      <p>This will allow locally created scripts to run without signing, but scripts downloaded from the internet will require signing.</p>
+    </div>
+
+    <div class="method">
+      <h3>Method 3: Use Command Prompt Instead</h3>
+      <p>Command Prompt doesn't have the same execution policy restrictions as PowerShell. Open Command Prompt and navigate to your project directory:</p>
+      <pre>cd c:\Users\mehro\kodo_final
+npm run dev</pre>
+    </div>
+
+    <div class="method">
+      <h3>Method 4: Use VS Code Terminal</h3>
+      <p>VS Code's integrated terminal can be configured to use Command Prompt instead of PowerShell:</p>
+      <ol>
+        <li>Open VS Code</li>
+        <li>Press <code>Ctrl+,</code> to open Settings</li>
+        <li>Search for "terminal.integrated.defaultProfile.windows"</li>
+        <li>Set it to "Command Prompt"</li>
+        <li>Open a new terminal in VS Code and run your commands</li>
+      </ol>
+    </div>
+
+    <div class="success">
+      <h3>After Fixing the Execution Policy</h3>
+      <p>Once you've fixed the execution policy, you should:</p>
+      <ol>
+        <li>Initialize the database: <code>npm run prisma:push</code></li>
+        <li>Seed the database: <code>npm run prisma:seed</code></li>
+        <li>Create a test user: <code>npm run create:test-user</code></li>
+        <li>Start the development server: <code>npm run dev</code></li>
+      </ol>
+    </div>
+
+    <div class="links">
+      <a href="/login-test.html">Go to Login Test</a>
+      <a href="/test-bcrypt.html">Test bcrypt</a>
+      <a href="/">Go to Main App</a>
+    </div>
+  </div>
+</body>
+</html>

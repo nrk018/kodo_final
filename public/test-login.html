@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kōdo Login Test</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #f0f8ff;
+    }
+    h1 {
+      color: #0066cc;
+      text-align: center;
+    }
+    .card {
+      background-color: white;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      margin-bottom: 20px;
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+      color: #333;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+    button {
+      background-color: #0066cc;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+      width: 100%;
+    }
+    button:hover {
+      background-color: #0055aa;
+    }
+    .result {
+      margin-top: 20px;
+      padding: 15px;
+      border-radius: 4px;
+      background-color: #f5f5f5;
+      white-space: pre-wrap;
+      overflow-x: auto;
+    }
+    .success {
+      color: green;
+    }
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <h1>Kōdo Login Test</h1>
+  
+  <div class="card">
+    <h2>Create Test User</h2>
+    <p>This will create a test user with the following credentials:</p>
+    <ul>
+      <li><strong>Email:</strong> test@kodo.dev</li>
+      <li><strong>Password:</strong> password123</li>
+    </ul>
+    <button id="createUserBtn">Create Test User</button>
+    <div id="createUserResult" class="result"></div>
+  </div>
+
+  <div class="card">
+    <h2>Login Test</h2>
+    <div class="form-group">
+      <label for="email">Email:</label>
+      <input type="email" id="email" value="test@kodo.dev">
+    </div>
+    <div class="form-group">
+      <label for="password">Password:</label>
+      <input type="password" id="password" value="password123">
+    </div>
+    <button id="loginBtn">Test Login</button>
+    <div id="loginResult" class="result"></div>
+  </div>
+
+  <div class="card">
+    <h2>Check User Profile</h2>
+    <button id="profileBtn">Get User Profile</button>
+    <div id="profileResult" class="result"></div>
+  </div>
+
+  <script>
+    // Create Test User
+    document.getElementById('createUserBtn').addEventListener('click', async () => {
+      const resultElement = document.getElementById('createUserResult');
+      resultElement.textContent = 'Creating test user...';
+      resultElement.className = 'result';
+      
+      try {
+        // Create a test user directly through the API
+        const hashedPassword = await bcryptHash('password123', 10); // Simple implementation below
+        
+        const response = await fetch('/api/auth/signup', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            username: 'testuser',
+            email: 'test@kodo.dev',
+            password: 'password123', // The API will hash this
+          }),
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+          resultElement.textContent = 'Test user created successfully!';
+          resultElement.className = 'result success';
+        } else {
+          if (data.error.includes('already exists')) {
+            resultElement.textContent = 'Test user already exists. You can proceed with login.';
+            resultElement.className = 'result success';
+          } else {
+            throw new Error(data.error || 'Failed to create test user');
+          }
+        }
+      } catch (error) {
+        resultElement.textContent = `Error: ${error.message}`;
+        resultElement.className = 'result error';
+      }
+    });
+
+    // Test Login
+    document.getElementById('loginBtn').addEventListener('click', async () => {
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const resultElement = document.getElementById('loginResult');
+      
+      resultElement.textContent = 'Logging in...';
+      resultElement.className = 'result';
+      
+      try {
+        const response = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ email, password }),
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+          resultElement.textContent = `Login successful!\nUser: ${JSON.stringify(data.user, null, 2)}\nCookies: ${document.cookie}`;
+          resultElement.className = 'result success';
+        } else {
+          throw new Error(data.error || 'Login failed');
+        }
+      } catch (error) {
+        resultElement.textContent = `Error: ${error.message}\nStatus: ${error.status || 'unknown'}`;
+        resultElement.className = 'result error';
+        console.error('Login error:', error);
+      }
+    });
+
+    // Get User Profile
+    document.getElementById('profileBtn').addEventListener('click', async () => {
+      const resultElement = document.getElementById('profileResult');
+      resultElement.textContent = 'Fetching profile...';
+      resultElement.className = 'result';
+      
+      try {
+        // Get user ID from cookie
+        const userId = getCookie('user-id');
+        
+        if (!userId) {
+          throw new Error('Not logged in. Please login first.');
+        }
+        
+        const response = await fetch('/api/user/profile', {
+          headers: {
+            'x-user-id': userId,
+          },
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+          resultElement.textContent = `User Profile:\n${JSON.stringify(data.user, null, 2)}`;
+          resultElement.className = 'result success';
+        } else {
+          throw new Error(data.error || 'Failed to fetch profile');
+        }
+      } catch (error) {
+        resultElement.textContent = `Error: ${error.message}`;
+        resultElement.className = 'result error';
+      }
+    });
+
+    // Helper function to get cookie value
+    function getCookie(name) {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) return parts.pop().split(';').shift();
+      return undefined;
+    }
+
+    // Simple bcrypt hash implementation for client-side
+    // Note: This is a simplified version and not secure for production
+    async function bcryptHash(password, rounds) {
+      // In a real implementation, we would use bcrypt.js
+      // This is just a placeholder that returns a mock hash
+      return `$2a$${rounds}$mockhashfor${password}`;
+    }
+  </script>
+</body>
+</html>
