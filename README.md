@@ -1,5 +1,3 @@
-Here’s a comprehensive README template for the kodo_final project:
-
 ⸻
 
 Kodo Final
