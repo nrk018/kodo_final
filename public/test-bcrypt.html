@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kōdo bcrypt Test</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #f0f8ff;
+    }
+    h1 {
+      color: #0066cc;
+      text-align: center;
+    }
+    .card {
+      background-color: white;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      margin-bottom: 20px;
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    input {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+    button {
+      background-color: #0066cc;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+      width: 100%;
+      margin-bottom: 10px;
+    }
+    button:hover {
+      background-color: #0055aa;
+    }
+    .result {
+      margin-top: 15px;
+      padding: 10px;
+      border-radius: 4px;
+      background-color: #f5f5f5;
+      white-space: pre-wrap;
+      overflow-x: auto;
+    }
+    .success {
+      color: green;
+    }
+    .error {
+      color: red;
+    }
+    .links {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    .links a {
+      flex: 1;
+      text-align: center;
+      background-color: #0066cc;
+      color: white;
+      text-decoration: none;
+      padding: 10px;
+      border-radius: 4px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h1>Kōdo bcrypt Test</h1>
+  
+  <div class="card">
+    <h2>Test bcrypt Functionality</h2>
+    <div class="form-group">
+      <label for="password">Password to hash:</label>
+      <input type="text" id="password" value="password123">
+    </div>
+    <button id="testBcryptBtn">Test bcrypt</button>
+    <div id="bcryptResult" class="result">Results will appear here...</div>
+    
+    <div class="links">
+      <a href="/login-test.html">Go to Login Test</a>
+      <a href="/">Go to Main App</a>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('testBcryptBtn').addEventListener('click', async () => {
+      const password = document.getElementById('password').value;
+      const resultElement = document.getElementById('bcryptResult');
+      
+      resultElement.textContent = 'Testing bcrypt...';
+      resultElement.className = 'result';
+      
+      try {
+        console.log('Testing bcrypt with password:', password);
+        
+        const response = await fetch('/api/auth/test-bcrypt', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ password }),
+        });
+        
+        console.log('bcrypt test response status:', response.status);
+        const data = await response.json();
+        console.log('bcrypt test response data:', data);
+        
+        if (response.ok) {
+          resultElement.innerHTML = `
+            <p class="success">bcrypt test successful!</p>
+            <p><strong>Hashed Password:</strong> ${data.hashedPassword}</p>
+            <p><strong>Verification Result:</strong> ${data.verified}</p>
+            <p><strong>bcrypt Version:</strong> ${data.bcryptVersion || 'unknown'}</p>
+          `;
+          resultElement.className = 'result success';
+        } else {
+          throw new Error(data.error || 'bcrypt test failed');
+        }
+      } catch (error) {
+        console.error('bcrypt test error:', error);
+        resultElement.innerHTML = `
+          <p class="error">Error: ${error.message}</p>
+          <p>This could indicate an issue with the bcrypt library.</p>
+          <p>Check the browser console for more details.</p>
+        `;
+        resultElement.className = 'result error';
+      }
+    });
+  </script>
+</body>
+</html>

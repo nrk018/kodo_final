@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { useToast } from "@/components/ui/use-toast"
 
 interface LoginFormProps {
   onLogin: (email: string, password: string) => void
@@ -16,11 +17,61 @@ interface LoginFormProps {
 export function LoginForm({ onLogin, onSwitchToSignup }: LoginFormProps) {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
+  const { toast } = useToast()
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (email && password) {
-      onLogin(email, password)
+      try {
+        setIsLoading(true)
+        
+        // For debugging - log the attempt
+        console.log('Attempting login with:', { email })
+        
+        // Call the API
+        const response = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ email, password }),
+        })
+        
+        // For debugging - log the response status
+        console.log('Login response status:', response.status)
+        
+        const data = await response.json()
+        console.log('Login response data:', data)
+        
+        if (!response.ok) {
+          throw new Error(data.error || 'Login failed')
+        }
+        
+        // Set cookies for authentication
+        document.cookie = `auth-token=authenticated; path=/; max-age=${60 * 60 * 24 * 7}` // 1 week
+        document.cookie = `user-id=${data.user.id}; path=/; max-age=${60 * 60 * 24 * 7}` // 1 week
+        
+        // For debugging - verify cookies were set
+        console.log('Cookies after login:', document.cookie)
+        
+        // Call the onLogin callback with the user data
+        onLogin(email, password)
+        
+        toast({
+          title: "Login successful",
+          description: "Welcome back to Kōdo!",
+        })
+      } catch (error) {
+        console.error('Login error:', error)
+        toast({
+          title: "Login failed",
+          description: error instanceof Error ? error.message : 'Something went wrong',
+          variant: "destructive",
+        })
+      } finally {
+        setIsLoading(false)
+      }
     }
   }
 

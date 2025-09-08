@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { useToast } from "@/components/ui/use-toast"
 
 interface SignupFormProps {
   onSignup: (email: string, password: string, username: string) => void
@@ -17,11 +18,51 @@ export function SignupForm({ onSignup, onSwitchToLogin }: SignupFormProps) {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [username, setUsername] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
+  const { toast } = useToast()
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (email && password && username) {
-      onSignup(email, password, username)
+      try {
+        setIsLoading(true)
+        
+        // Call the API
+        const response = await fetch('/api/auth/signup', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ email, password, username }),
+        })
+        
+        const data = await response.json()
+        
+        if (!response.ok) {
+          throw new Error(data.error || 'Signup failed')
+        }
+        
+        // Set cookies for authentication
+        document.cookie = `auth-token=authenticated; path=/; max-age=${60 * 60 * 24 * 7}` // 1 week
+        document.cookie = `user-id=${data.user.id}; path=/; max-age=${60 * 60 * 24 * 7}` // 1 week
+        
+        // Call the onSignup callback with the user data
+        onSignup(email, password, username)
+        
+        toast({
+          title: "Signup successful",
+          description: "Welcome to Kōdo! Your adventure begins now.",
+        })
+      } catch (error) {
+        console.error('Signup error:', error)
+        toast({
+          title: "Signup failed",
+          description: error instanceof Error ? error.message : 'Something went wrong',
+          variant: "destructive",
+        })
+      } finally {
+        setIsLoading(false)
+      }
     }
   }
 

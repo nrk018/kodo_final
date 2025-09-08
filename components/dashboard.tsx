@@ -18,10 +18,16 @@ import { Projects } from "@/components/projects"
 import { Internships } from "@/components/internships"
 import { Mentors } from "@/components/mentors"
 import { Competition } from "@/components/competition"
+import { CoinShop } from "@/components/coin-shop"
 
 interface User {
+  id: string
   username: string
   email: string
+  xp: number
+  level: number
+  coins: number
+  streak: number
 }
 
 interface Lesson {
@@ -52,10 +58,10 @@ interface DashboardProps {
 }
 
 export function Dashboard({ user, onLogout }: DashboardProps) {
-  const [xp, setXp] = useState(1250)
-  const [level, setLevel] = useState(5)
-  const [coins, setCoins] = useState(340)
-  const [streak] = useState(7)
+  const [xp, setXp] = useState(user.xp || 1250)
+  const [level, setLevel] = useState(user.level || 5)
+  const [coins, setCoins] = useState(user.coins || 340)
+  const [streak] = useState(user.streak || 7)
   const [currentView, setCurrentView] = useState<
     | "dashboard"
     | "quests"
@@ -71,6 +77,7 @@ export function Dashboard({ user, onLogout }: DashboardProps) {
     | "internships"
     | "mentors"
     | "competition"
+    | "coin-shop"
   >("dashboard")
   const [selectedQuest, setSelectedQuest] = useState<Quest | null>(null)
   const [showLootChest, setShowLootChest] = useState(false)
@@ -474,6 +481,16 @@ export function Dashboard({ user, onLogout }: DashboardProps) {
         onPointsEarned={handlePointsEarned}
         onPointsSpent={handlePointsSpent}
         userLevel={level}
+      />
+    )
+  }
+
+  if (currentView === "coin-shop") {
+    return (
+      <CoinShop
+        onBackToDashboard={handleBackToDashboard}
+        userCoins={coins}
+        onCoinsUpdated={setCoins}
       />
     )
   }
