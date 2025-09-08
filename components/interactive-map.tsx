@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
 
 interface Quest {
@@ -39,7 +38,7 @@ export function InteractiveMap({ quests, onSelectQuest, onBackToDashboard, userL
   const [timeOfDay, setTimeOfDay] = useState<"day" | "night">("day")
   const [selectedBiome, setSelectedBiome] = useState<string | null>(null)
 
-  // Cycle day/night every 30 seconds for immersion
+  // Cycle day/night every 30 seconds
   useEffect(() => {
     const interval = setInterval(() => {
       setTimeOfDay((prev) => (prev === "day" ? "night" : "day"))
@@ -61,23 +60,6 @@ export function InteractiveMap({ quests, onSelectQuest, onBackToDashboard, userL
         return "🕳️"
       default:
         return "🗺️"
-    }
-  }
-
-  const getBiomeColor = (biome: string) => {
-    switch (biome) {
-      case "Forest":
-        return "bg-green-500 hover:bg-green-600 border-green-700"
-      case "Desert":
-        return "bg-yellow-500 hover:bg-yellow-600 border-yellow-700"
-      case "Ocean":
-        return "bg-blue-500 hover:bg-blue-600 border-blue-700"
-      case "Mountain":
-        return "bg-gray-500 hover:bg-gray-600 border-gray-700"
-      case "Cave":
-        return "bg-stone-600 hover:bg-stone-700 border-stone-800"
-      default:
-        return "bg-primary hover:bg-primary/90 border-primary"
     }
   }
 
@@ -143,9 +125,10 @@ export function InteractiveMap({ quests, onSelectQuest, onBackToDashboard, userL
         </div>
       </header>
 
+      {/* Main Layout */}
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          {/* Map Area */}
+          {/* World Map Section with WorkAdventure */}
           <div className="lg:col-span-3">
             <Card className="border-4 border-stone-600 shadow-lg bg-card/90 backdrop-blur-sm">
               <CardHeader>
@@ -153,96 +136,21 @@ export function InteractiveMap({ quests, onSelectQuest, onBackToDashboard, userL
                   <span className="text-2xl">🗺️</span>
                   Kōdo World Map
                 </CardTitle>
-                <CardDescription>Click on biomes to explore available quests</CardDescription>
+                <CardDescription>Now powered by WorkAdventure</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="relative bg-gradient-to-br from-green-100 to-blue-100 rounded-lg border-4 border-stone-400 p-8 min-h-[500px] overflow-hidden">
-                  {/* Grid background for blocky feel */}
-                  <div className="absolute inset-0 opacity-10">
-                    <div className="grid grid-cols-20 grid-rows-20 h-full w-full">
-                      {Array.from({ length: 400 }).map((_, i) => (
-                        <div key={i} className="border border-stone-300"></div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Quest Blocks */}
-                  <div className="relative z-10">
-                    {quests.map((quest) => {
-                      const status = getQuestStatus(quest)
-                      const completedLessons = quest.lessons.filter((lesson) => lesson.completed).length
-                      const progressPercent = (completedLessons / quest.lessons.length) * 100
-
-                      return (
-                        <div
-                          key={quest.id}
-                          className="absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer group"
-                          style={{
-                            left: `${quest.mapPosition.x}%`,
-                            top: `${quest.mapPosition.y}%`,
-                          }}
-                          onClick={() => quest.isUnlocked && onSelectQuest(quest)}
-                          onMouseEnter={() => setSelectedBiome(quest.biome)}
-                          onMouseLeave={() => setSelectedBiome(null)}
-                        >
-                          {/* Quest Block */}
-                          <div
-                            className={`w-20 h-20 rounded-lg border-4 shadow-lg transition-all duration-200 flex flex-col items-center justify-center text-white font-bold text-sm ${getBiomeColor(
-                              quest.biome,
-                            )} ${
-                              quest.isUnlocked ? "hover:scale-110 hover:shadow-xl" : "opacity-50 cursor-not-allowed"
-                            }`}
-                          >
-                            <div className="text-2xl">{getBiomeEmoji(quest.biome)}</div>
-                            <div className="text-xs">{getStatusEmoji(status)}</div>
-                          </div>
-
-                          {/* Progress Ring */}
-                          {quest.isUnlocked && progressPercent > 0 && (
-                            <div className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-primary border-2 border-white flex items-center justify-center text-xs font-bold text-white">
-                              {Math.round(progressPercent)}
-                            </div>
-                          )}
-
-                          {/* Hover Tooltip */}
-                          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
-                            <div className="bg-card border-2 border-stone-400 rounded-lg p-3 shadow-lg min-w-48">
-                              <h3 className="font-bold text-primary text-sm">{quest.title}</h3>
-                              <p className="text-xs text-muted-foreground mt-1">{quest.description}</p>
-                              <div className="flex items-center justify-between mt-2 text-xs">
-                                <span className="flex items-center gap-1">
-                                  <span>⭐</span>
-                                  {quest.totalXP} XP
-                                </span>
-                                <Badge variant="outline" className="text-xs">
-                                  {quest.difficulty}
-                                </Badge>
-                              </div>
-                              {quest.isUnlocked && progressPercent > 0 && (
-                                <div className="mt-2">
-                                  <Progress value={progressPercent} className="h-1" />
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      )
-                    })}
-
-                    {/* Decorative Elements */}
-                    <div className="absolute top-4 right-4 text-4xl animate-bounce">
-                      {timeOfDay === "day" ? "☀️" : "⭐"}
-                    </div>
-                    <div className="absolute bottom-4 left-4 text-2xl">🏰</div>
-                    <div className="absolute top-1/2 left-4 text-2xl">🌳</div>
-                    <div className="absolute bottom-1/3 right-1/4 text-2xl">🏔️</div>
-                  </div>
+                <div className="relative rounded-lg border-4 border-stone-400 overflow-hidden min-h-[500px]">
+                  <iframe
+                    src="https://play.staging.workadventu.re/@/tcm/workadventure/wa-village"
+                    className="w-full h-[600px] rounded-lg border-0"
+                    allow="camera; microphone; fullscreen; display-capture"
+                  />
                 </div>
               </CardContent>
             </Card>
           </div>
 
-          {/* Biome Info Panel */}
+          {/* Right Side Panels */}
           <div className="space-y-6">
             <Card className="border-4 border-stone-600 shadow-lg bg-card/90 backdrop-blur-sm">
               <CardHeader>
